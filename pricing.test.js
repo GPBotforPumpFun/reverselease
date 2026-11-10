@@ -1,0 +1,4 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const source=fs.readFileSync('public/app.js','utf8');const funcs=source.slice(source.indexOf('function cost('),source.indexOf('function offers('));const ctx=vm.createContext({});vm.runInContext(funcs,ctx);
+test('first payment included at signing is not counted twice',()=>{assert.equal(ctx.cost({due:1800,monthly:389,term:36,first:true}),15415)});
+test('first payment excluded means every payment remains',()=>{assert.equal(ctx.cost({due:0,monthly:400,term:36,first:false}),14400)});
+test('higher monthly payment can have lower total cost',()=>{const a={due:1800,monthly:389,term:36,first:true},b={due:950,monthly:399,term:36,first:true};assert.ok(ctx.cost(b)<ctx.cost(a));assert.equal(ctx.effective(b),14915/36)});
